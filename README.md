@@ -19,7 +19,7 @@ It does **not** automate Typeless login/logout itself. Account switching remains
 ### 1. Check the current Typeless account
 
 ```bash
-/Users/Totoro/bin/typeless-dict whoami
+$HOME/bin/typeless-dict whoami
 ```
 
 ### 2. Export a portable bundle
@@ -51,9 +51,15 @@ $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_tra
 ## Requirements / Compatibility
 
 - macOS with Typeless desktop app installed at `/Applications/Typeless.app`
-- local helper binary at `/Users/Totoro/bin/typeless-dict`
+- local helper binary at `$HOME/bin/typeless-dict`
 - a Typeless account already logged into the desktop app
 - Node.js available locally so the helper can attach to Typeless via remote debugging
+- `python3` available locally because the wrapper uses it for small JSON parsing steps
+
+Optional overrides:
+
+- `TYPELESS_DICT_BIN` overrides the `typeless-dict` binary path (default: `$HOME/bin/typeless-dict`)
+- `TYPELESS_TRANSFER_BASE` overrides the export bundle output base directory (default: `$HOME/Downloads`)
 
 The workflow is designed around the local Typeless desktop client and its current request/signing behavior. If Typeless changes its desktop internals substantially, the helper may need to be updated.
 
@@ -62,13 +68,13 @@ The workflow is designed around the local Typeless desktop client and its curren
 This skill is already structured for Codex under:
 
 ```text
-/Users/Totoro/.codex/skills/typeless-dictionary-transfer/
+$HOME/.codex/skills/typeless-dictionary-transfer/
 ```
 
 If you only want the command-line workflow, the core helper is:
 
 ```bash
-/Users/Totoro/bin/typeless-dict help
+$HOME/bin/typeless-dict help
 ```
 
 ## What It Does
@@ -92,6 +98,7 @@ This makes the same tooling useful for:
 ```text
 typeless-dictionary-transfer/
 ├── README.md
+├── README.zh-CN.md
 ├── SKILL.md
 ├── agents/
 │   └── openai.yaml
@@ -102,7 +109,7 @@ typeless-dictionary-transfer/
 Related helper outside this skill directory:
 
 ```text
-/Users/Totoro/bin/typeless-dict
+$HOME/bin/typeless-dict
 ```
 
 ## Usage
@@ -110,32 +117,32 @@ Related helper outside this skill directory:
 ### Verify current account
 
 ```bash
-/Users/Totoro/bin/typeless-dict whoami
+$HOME/bin/typeless-dict whoami
 ```
 
 ### Export the current dictionary directly
 
 ```bash
-/Users/Totoro/bin/typeless-dict export /tmp/typeless-dictionary.json --tab all --format json
-/Users/Totoro/bin/typeless-dict export /tmp/typeless-dictionary.txt --tab all --format txt
+$HOME/bin/typeless-dict export /tmp/typeless-dictionary.json --tab all --format json
+$HOME/bin/typeless-dict export /tmp/typeless-dictionary.txt --tab all --format txt
 ```
 
 ### Dry-run import
 
 ```bash
-/Users/Totoro/bin/typeless-dict import /path/to/dictionary.txt --dry-run
+$HOME/bin/typeless-dict import /path/to/dictionary.txt --dry-run
 ```
 
 ### Import
 
 ```bash
-/Users/Totoro/bin/typeless-dict import /path/to/dictionary.txt
+$HOME/bin/typeless-dict import /path/to/dictionary.txt
 ```
 
 ### Delete one term
 
 ```bash
-/Users/Totoro/bin/typeless-dict delete "term-here"
+$HOME/bin/typeless-dict delete "term-here"
 ```
 
 ## Wrapper Workflow
@@ -145,6 +152,18 @@ Related helper outside this skill directory:
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle [label]
 ```
+
+If you need custom paths, set `TYPELESS_DICT_BIN` or `TYPELESS_TRANSFER_BASE` first.
+
+### Compare bundle vs current account
+
+Exports the *currently logged-in* dictionary and compares it to the bundle:
+
+```bash
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh compare-bundle-vs-current <bundle-dir>
+```
+
+By default it prints JSON. Use `--text` for a human-friendly summary.
 
 ### Dry-run import from bundle
 
@@ -157,6 +176,23 @@ $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_tra
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle <bundle-dir>
 ```
+
+### Sync bundle to current account
+
+Add-only sync (safe default):
+
+```bash
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh sync-bundle-to-current <bundle-dir>
+```
+
+Mirror sync (adds missing terms and deletes extras) requires explicit opt-in:
+
+```bash
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh sync-bundle-to-current <bundle-dir> --mode mirror --dry-run
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh sync-bundle-to-current <bundle-dir> --mode mirror --delete-extras
+```
+
+Note: deletions can be slow because the underlying helper deletes one term per run.
 
 ## Recommended Cross-Account Transfer Flow
 
@@ -180,7 +216,7 @@ The tooling intentionally stops short of automating account login/logout.
 ### 4. Verify target account B
 
 ```bash
-/Users/Totoro/bin/typeless-dict whoami
+$HOME/bin/typeless-dict whoami
 ```
 
 ### 5. Dry-run the import
@@ -220,11 +256,11 @@ $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_tra
 
 Primary implementation docs for Codex live in:
 
-- [SKILL.md](/Users/Totoro/.codex/skills/typeless-dictionary-transfer/SKILL.md)
+- [SKILL.md](SKILL.md)
 
 Useful helper entry point:
 
-- [/Users/Totoro/bin/typeless-dict](/Users/Totoro/bin/typeless-dict)
+- `$HOME/bin/typeless-dict`
 
 If you update the skill workflow, make sure README, `SKILL.md`, and the wrapper script stay aligned.
 

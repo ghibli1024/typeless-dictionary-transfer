@@ -33,44 +33,49 @@ Switching accounts is optional workflow glue, not the core capability. The core 
 - Keep the exported bundle on disk even after a successful import.
 - If the import target is the same account as the export source, call that out as restore/sync, not migration.
 - Do not silently import into a different Typeless account without an explicit confirmation point.
+- For “mirror sync” (deleting terms that exist in the current account but not in the bundle), require an explicit opt-in and strongly prefer a dry run first.
 
 ## Prerequisites
 
 - Typeless desktop app exists at `/Applications/Typeless.app`.
-- The local helper binary exists at `/Users/Totoro/bin/typeless-dict`.
-- Typeless can start normally on the machine.
+- The local helper binary exists at `$HOME/bin/typeless-dict` by default, or the caller overrides it with `TYPELESS_DICT_BIN`.
+- The export bundle base directory defaults to `$HOME/Downloads`, or the caller overrides it with `TYPELESS_TRANSFER_BASE`.
+- Typeless desktop app is openable and the intended account is logged in.
+- `typeless-dict whoami` returns the current account successfully.
+- Node.js is available locally for the Typeless helper workflow.
+- `python3` is available locally for small wrapper-side JSON parsing.
 
 ## Core Commands
 
 Verify the currently logged-in Typeless account:
 
 ```bash
-/Users/Totoro/bin/typeless-dict whoami
+$HOME/bin/typeless-dict whoami
 ```
 
 Export the currently logged-in dictionary:
 
 ```bash
-/Users/Totoro/bin/typeless-dict export /tmp/typeless-dictionary.json --tab all --format json
-/Users/Totoro/bin/typeless-dict export /tmp/typeless-dictionary.txt --tab all --format txt
+$HOME/bin/typeless-dict export /tmp/typeless-dictionary.json --tab all --format json
+$HOME/bin/typeless-dict export /tmp/typeless-dictionary.txt --tab all --format txt
 ```
 
 Dry-run an import into the currently logged-in account:
 
 ```bash
-/Users/Totoro/bin/typeless-dict import /path/to/dictionary.txt --dry-run
+$HOME/bin/typeless-dict import /path/to/dictionary.txt --dry-run
 ```
 
 Import into the currently logged-in account:
 
 ```bash
-/Users/Totoro/bin/typeless-dict import /path/to/dictionary.txt
+$HOME/bin/typeless-dict import /path/to/dictionary.txt
 ```
 
 Delete one term from the currently logged-in account:
 
 ```bash
-/Users/Totoro/bin/typeless-dict delete "term-here"
+$HOME/bin/typeless-dict delete "term-here"
 ```
 
 ## Recommended Workflow
@@ -80,7 +85,7 @@ Delete one term from the currently logged-in account:
 Use the wrapper script:
 
 ```bash
-$CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle [label]
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle [label]
 ```
 
 This creates a bundle under `~/Downloads/typeless-transfer-.../` with:
@@ -100,6 +105,16 @@ This is the right point to:
 - add extra terms manually
 - compare source and target dictionaries
 
+### 2.5 Compare Bundle vs Current (Optional)
+
+If you want a precise diff between a bundle and the *currently logged-in* account (adds vs extras), use:
+
+```bash
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh compare-bundle-vs-current <bundle-dir>
+```
+
+This exports the current dictionary on demand and prints a JSON summary.
+
 ### 3. Optional Account Switch
 
 If the goal is cross-account transfer, ask the user to sign out of Typeless account A and sign into account B.
@@ -111,7 +126,7 @@ Do not continue until `typeless-dict whoami` confirms the target account.
 Use:
 
 ```bash
-$CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-dry-run <bundle-dir>
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-dry-run <bundle-dir>
 ```
 
 Review:
@@ -125,7 +140,7 @@ Review:
 Only after explicit confirmation:
 
 ```bash
-$CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle <bundle-dir>
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle <bundle-dir>
 ```
 
 ### 6. Validate Result
@@ -133,7 +148,7 @@ $CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_tran
 Run:
 
 ```bash
-/Users/Totoro/bin/typeless-dict export /tmp/typeless-post-import.json --tab all --format json
+$HOME/bin/typeless-dict export /tmp/typeless-post-import.json --tab all --format json
 ```
 
 Then compare:
@@ -152,9 +167,11 @@ Bundled helper:
 Usage:
 
 ```bash
-$CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle [label]
-$CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-dry-run <bundle-dir>
-$CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle <bundle-dir>
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle [label]
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-dry-run <bundle-dir>
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle <bundle-dir>
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh compare-bundle-vs-current <bundle-dir> [--text] [--no-words] [--limit-words N] [--port PORT]
+$HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh sync-bundle-to-current <bundle-dir> [--mode add-only|mirror] [--dry-run] [--delete-extras] [--delete-extras-max N] [--port PORT]
 ```
 
 ## Failure Handling
@@ -163,6 +180,7 @@ $CODEX_HOME/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_tran
 - If export unexpectedly returns zero terms, inspect the current Typeless dictionary page before continuing.
 - If dry run shows suspicious terms, edit the bundle before import.
 - If import or delete partially fails, keep the bundle and report the failed terms explicitly.
+- If a mirror sync is requested, call out that deletions can be slow because the underlying helper does not support batch delete in a single run.
 
 ## Output Expectations
 
