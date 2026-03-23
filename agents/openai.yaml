@@ -1,0 +1,4 @@
+interface:
+  display_name: "Typeless Dictionary Transfer"
+  short_description: "Export, review, and import Typeless dictionaries"
+  default_prompt: "Use $typeless-dictionary-transfer to export a Typeless dictionary bundle and import it into another Typeless account safely."
