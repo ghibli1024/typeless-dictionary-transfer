@@ -264,6 +264,10 @@ Codex 侧的主要实现说明在：
 
 如果你后续继续扩展这个 skill，请保持 README、`SKILL.md` 和包装脚本的一致性。
 
-## 许可证 / 状态
+## 许可证
 
-当前它仍是本地 Codex 环境下维护的 skill/workflow。是否独立公开发布、使用什么 License，与它最终落入哪个远端仓库有关。
+本项目使用 MIT License。
+
+见：
+
+- [LICENSE](LICENSE)

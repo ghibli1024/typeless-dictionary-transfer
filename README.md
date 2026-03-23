@@ -264,6 +264,10 @@ Useful helper entry point:
 
 If you update the skill workflow, make sure README, `SKILL.md`, and the wrapper script stay aligned.
 
-## License / Status
+## License
 
-This is currently a local skill/workflow maintained in the user's Codex environment. Repository packaging and public release strategy depend on where it is eventually published.
+This project is licensed under the MIT License.
+
+See:
+
+- [LICENSE](LICENSE)
