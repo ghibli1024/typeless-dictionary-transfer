@@ -1,38 +1,37 @@
 # Typeless Dictionary Transfer
 
-[![README-English](https://img.shields.io/badge/README-English-555555?style=for-the-badge)](README.md)
-[![README-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87](https://img.shields.io/badge/README-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-2d6cdf?style=for-the-badge)](README.zh-CN.md)
+中文 | [English](README.en.md)
 
-Export Typeless personal dictionaries into editable, portable local bundles that can be reviewed, modified, re-imported, or transferred across accounts.
+把 Typeless 个人词典导出成可编辑、可迁移的本地 bundle，审查或修改后再导入到当前登录的 Typeless 账号。
 
-Typeless officially supports bulk dictionary import in [macOS App v1.4.0](https://www.typeless.com/help/release-notes/macos), released on May 14, 2026. Beyond bulk import, this project additionally provides dictionary export, editable re-import, cross-account transfer, dry-run preview, comparison, and sync.
+Typeless 官方已在 2026年5月14日发布的 [macOS App v1.4.0](https://www.typeless.com/help/release-notes/macos) 中支持“批量导入词典”。本项目在批量导入之外，额外提供词典导出、编辑后回导、跨账号迁移、导入前预览、对比与同步能力。
 
-This project focuses on dictionary portability first and cross-account migration second. It helps you:
+这个项目优先解决“词典可移植性”，账号迁移只是其中一个场景。它可以帮助你：
 
-- export the currently logged-in Typeless dictionary as `dictionary.txt` / `dictionary.json`
-- manually review or edit the exported dictionary files
-- re-import edited files into the same Typeless account
-- import the bundle into another Typeless account after an explicit account switch
-- preview an import with dry-run before writing, including terms that would be added or skipped
-- compare the current account against an exported bundle and sync with add-only or explicit mirror mode
+- 导出当前登录 Typeless 账号的词典为 `dictionary.txt` / `dictionary.json`
+- 人工审阅、修改导出的词典文件
+- 修改后导回自己的 Typeless 账号
+- 在明确切换账号后，把 bundle 导入另一个 Typeless 账号
+- 在正式写入前执行导入前预览（dry-run），查看会新增或跳过哪些词
+- 对比当前账号与导出包差异，并按 add-only 或显式 mirror 模式同步
 
-It does **not** automate Typeless login/logout itself. Account switching remains an intentional manual checkpoint to reduce the risk of importing into the wrong account.
+它**不会**自动替你执行 Typeless 的登录/登出。账号切换保留为显式人工检查点，以降低把词典导入错误账号的风险。
 
-## Quickstart
+## 快速开始
 
-### 1. Check the current Typeless account
+### 1. 查看当前 Typeless 账号
 
 ```bash
 $HOME/bin/typeless-dict whoami
 ```
 
-### 2. Export a portable bundle
+### 2. 导出一个可移植 bundle
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle source-account
 ```
 
-This creates a bundle under `~/Downloads/typeless-transfer-.../` with:
+这会在 `~/Downloads/typeless-transfer-.../` 下生成：
 
 ```text
 account.json
@@ -40,69 +39,69 @@ dictionary.json
 dictionary.txt
 ```
 
-### 3. Dry-run an import
+### 3. 先做一次导入前预览（dry-run）
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-dry-run /path/to/bundle-dir
 ```
 
-### 4. Import after explicit confirmation
+### 4. 确认后再正式导入
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle /path/to/bundle-dir
 ```
 
-## Requirements / Compatibility
+## 运行要求 / 兼容性
 
-- macOS with Typeless desktop app installed at `/Applications/Typeless.app`
-- local helper binary at `$HOME/bin/typeless-dict`
-- a Typeless account already logged into the desktop app
-- Node.js available locally so the helper can attach to Typeless via remote debugging
-- `python3` available locally because the wrapper uses it for small JSON parsing steps
+- macOS，且 Typeless 桌面客户端安装在 `/Applications/Typeless.app`
+- 本地 helper 命令存在于 `$HOME/bin/typeless-dict`
+- Typeless 桌面客户端中已经登录了一个账号
+- 本机有 Node.js，可供 helper 通过 remote debugging 接管 Typeless
+- 本机有 `python3`，因为包装脚本会用它做少量 JSON 解析
 
-Optional overrides:
+可选覆盖项：
 
-- `TYPELESS_DICT_BIN` overrides the `typeless-dict` binary path (default: `$HOME/bin/typeless-dict`)
-- `TYPELESS_TRANSFER_BASE` overrides the export bundle output base directory (default: `$HOME/Downloads`)
+- `TYPELESS_DICT_BIN`：覆盖 `typeless-dict` 的路径（默认：`$HOME/bin/typeless-dict`）
+- `TYPELESS_TRANSFER_BASE`：覆盖 bundle 导出根目录（默认：`$HOME/Downloads`）
 
-The workflow is designed around the local Typeless desktop client and its current request/signing behavior. If Typeless changes its desktop internals substantially, the helper may need to be updated.
+这套流程建立在当前 Typeless 桌面客户端的请求与签名行为之上。如果 Typeless 后续大改桌面内部实现，helper 可能需要同步更新。
 
-## Installation
+## 安装
 
-This skill is already structured for Codex under:
+这个 skill 当前已经放在 Codex 的本地 skill 目录中：
 
 ```text
 $HOME/.codex/skills/typeless-dictionary-transfer/
 ```
 
-If you only want the command-line workflow, the core helper is:
+如果你只想直接使用底层命令行能力，核心 helper 是：
 
 ```bash
 $HOME/bin/typeless-dict help
 ```
 
-## What It Does
+## 项目能力
 
-The workflow treats dictionary transfer as three operations:
+这套工作流可以拆成三个动作：
 
-1. **Export bundle** from the currently logged-in Typeless account
-2. **Review/edit bundle** locally before any import
-3. **Import bundle** into the currently logged-in Typeless account
+1. 从当前登录的 Typeless 账号导出 bundle
+2. 在本地审查/编辑 bundle
+3. 把 bundle 导入当前登录的 Typeless 账号
 
-This makes the same tooling useful for:
+所以它可以覆盖这些场景：
 
-- backup
-- restore
-- same-account re-import
-- cross-account transfer
-- cross-machine transfer
+- 备份
+- 恢复
+- 同账号重新导入
+- 跨账号转移
+- 跨机器转移
 
-## Repository Layout
+## 仓库结构
 
 ```text
 typeless-dictionary-transfer/
 ├── README.md
-├── README.zh-CN.md
+├── README.en.md
 ├── SKILL.md
 ├── agents/
 │   └── openai.yaml
@@ -110,168 +109,168 @@ typeless-dictionary-transfer/
     └── typeless_dictionary_transfer.sh
 ```
 
-Related helper outside this skill directory:
+相关底层 helper 位于 skill 目录之外：
 
 ```text
 $HOME/bin/typeless-dict
 ```
 
-## Usage
+## 使用方式
 
-### Verify current account
+### 查看当前账号
 
 ```bash
 $HOME/bin/typeless-dict whoami
 ```
 
-### Export the current dictionary directly
+### 直接导出当前词典
 
 ```bash
 $HOME/bin/typeless-dict export /tmp/typeless-dictionary.json --tab all --format json
 $HOME/bin/typeless-dict export /tmp/typeless-dictionary.txt --tab all --format txt
 ```
 
-### Dry-run import
+### 导入前预览（dry-run）
 
 ```bash
 $HOME/bin/typeless-dict import /path/to/dictionary.txt --dry-run
 ```
 
-### Import
+### 正式导入
 
 ```bash
 $HOME/bin/typeless-dict import /path/to/dictionary.txt
 ```
 
-### Delete one term
+### 删除一个词条
 
 ```bash
 $HOME/bin/typeless-dict delete "term-here"
 ```
 
-## Wrapper Workflow
+## 包装脚本工作流
 
-### Export bundle
+### 导出 bundle
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle [label]
 ```
 
-If you need custom paths, set `TYPELESS_DICT_BIN` or `TYPELESS_TRANSFER_BASE` first.
+如果你需要自定义路径，可以先设置 `TYPELESS_DICT_BIN` 或 `TYPELESS_TRANSFER_BASE`。
 
-### Compare bundle vs current account
+### 对比 bundle 与当前账号词典
 
-Exports the *currently logged-in* dictionary and compares it to the bundle:
+导出“当前登录账号”的词典并与 bundle 做对比：
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh compare-bundle-vs-current <bundle-dir>
 ```
 
-By default it prints JSON. Use `--text` for a human-friendly summary.
+默认输出 JSON；如果想要更易读的文本摘要，可加 `--text`。
 
-### Dry-run import from bundle
+### 从 bundle 做导入前预览（dry-run）
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-dry-run <bundle-dir>
 ```
 
-### Import bundle
+### 导入 bundle
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle <bundle-dir>
 ```
 
-### Sync bundle to current account
+### 把 bundle 同步到当前账号
 
-Add-only sync (safe default):
+默认是安全的 add-only 同步：
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh sync-bundle-to-current <bundle-dir>
 ```
 
-Mirror sync (adds missing terms and deletes extras) requires explicit opt-in:
+如果需要“镜像同步”（补齐缺失词条并删除当前账号多余词条），必须显式 opt-in：
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh sync-bundle-to-current <bundle-dir> --mode mirror --dry-run
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh sync-bundle-to-current <bundle-dir> --mode mirror --delete-extras
 ```
 
-Note: deletions can be slow because the underlying helper deletes one term per run.
+注意：删除可能会很慢，因为底层 helper 目前是按词逐条删除（不支持一次性批量删除）。
 
-## Recommended Cross-Account Transfer Flow
+## 推荐的跨账号转移流程
 
-### 1. Export from source account A
+### 1. 从 source 账号 A 导出
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh export-bundle source-a
 ```
 
-### 2. Review the bundle
+### 2. 审查 bundle
 
-Inspect and, if needed, edit:
+重点检查并按需编辑：
 
 - `dictionary.json`
 - `dictionary.txt`
 
-### 3. Manually switch Typeless to account B
+### 3. 手动把 Typeless 切换到账号 B
 
-The tooling intentionally stops short of automating account login/logout.
+这套工具刻意不自动执行登录/登出。
 
-### 4. Verify target account B
+### 4. 校验 target 账号 B
 
 ```bash
 $HOME/bin/typeless-dict whoami
 ```
 
-### 5. Dry-run the import
+### 5. 先执行导入前预览（dry-run）
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-dry-run /path/to/bundle-dir
 ```
 
-### 6. Import only after confirmation
+### 6. 确认后再导入
 
 ```bash
 $HOME/.codex/skills/typeless-dictionary-transfer/scripts/typeless_dictionary_transfer.sh import-bundle /path/to/bundle-dir
 ```
 
-## Troubleshooting
+## 故障排查
 
-- **Export returns zero terms unexpectedly**
-  Verify the Typeless desktop app is logged in and the dictionary page is accessible. Re-run `typeless-dict whoami` first.
+- **导出结果意外为 0**
+  先确认 Typeless 桌面客户端确实已登录，并重新运行 `typeless-dict whoami`。
 
-- **Dry run says too many terms already exist**
-  Review and trim `dictionary.txt` before importing. The bundle is intentionally plain text for easy edits.
+- **导入前预览（dry-run）显示已有词太多**
+  先审查并精简 `dictionary.txt`，再执行正式导入。bundle 刻意保留为纯文本，方便人工修改。
 
-- **Wrong account risk**
-  Always run `typeless-dict whoami` immediately before import. This is the main safety check.
+- **担心导入错账号**
+  在导入前永远先执行一次 `typeless-dict whoami`。这是最重要的安全检查。
 
-- **Typeless helper stops working after an app update**
-  The helper depends on current Typeless desktop behavior. Re-validate export/import after Typeless upgrades.
+- **Typeless 更新后 helper 失效**
+  这套工具依赖 Typeless 当前桌面行为；升级 Typeless 后应重新验证 export/import。
 
-## Security / Privacy
+## 安全 / 隐私
 
-- The workflow uses your local Typeless desktop session.
-- Exported bundles contain personal dictionary data and should be treated as private.
-- The bundle is intentionally stored on disk so you can inspect, edit, and archive it.
-- Do not send exported bundles to third parties unless you intend to share the contained terminology.
+- 这套流程直接复用你本机的 Typeless 桌面会话。
+- 导出的 bundle 包含你的个人词典数据，应视为私有文件。
+- bundle 被刻意保存在磁盘上，方便你审查、编辑和存档。
+- 如果你不打算共享这些术语，请不要把 bundle 发给第三方。
 
-## Support / Development
+## 支持 / 开发
 
-Primary implementation docs for Codex live in:
+Codex 侧的主要实现说明在：
 
 - [SKILL.md](SKILL.md)
 
-Useful helper entry point:
+底层 helper 入口在：
 
 - `$HOME/bin/typeless-dict`
 
-If you update the skill workflow, make sure README, `SKILL.md`, and the wrapper script stay aligned.
+如果你后续继续扩展这个 skill，请保持 README、`SKILL.md` 和包装脚本的一致性。
 
-## License
+## 许可证
 
-This project is licensed under the MIT License.
+本项目使用 MIT License。
 
-See:
+见：
 
 - [LICENSE](LICENSE)
